@@ -1,0 +1,13 @@
+include ':BroadcastBestPractice'
+include ':BroadcastTest2'
+include ':BroadcastTest'
+include ':FragmentBestPractice'
+include ':FragmentTest'
+include ':FragmentTest'
+include ':UIBestPractice'
+include ':UIBestPractice'
+include ':ActivityLifeCycleTest'
+include ':RecyclerViewTest'
+include ':ListViewTest'
+include ':demo'
+rootProject.name = "AndroidStudy"
