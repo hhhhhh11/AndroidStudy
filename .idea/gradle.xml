@@ -20,6 +20,7 @@
             <option value="$PROJECT_DIR$/FragmentTest" />
             <option value="$PROJECT_DIR$/ListViewTest" />
             <option value="$PROJECT_DIR$/RecyclerViewTest" />
+            <option value="$PROJECT_DIR$/SharedPreferencesTest" />
             <option value="$PROJECT_DIR$/UIBestPractice" />
             <option value="$PROJECT_DIR$/demo" />
           </set>

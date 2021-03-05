@@ -1,3 +1,4 @@
+include ':SharedPreferencesTest'
 include ':FilePersistenceTest'
 include ':BroadcastBestPractice'
 include ':BroadcastTest2'
