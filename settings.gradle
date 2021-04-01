@@ -1,3 +1,7 @@
+include ':testjar'
+include ':downFile'
+include ':DownloadTest'
+include ':DataBaseTest'
 include ':SharedPreferencesTest'
 include ':FilePersistenceTest'
 include ':BroadcastBestPractice'
@@ -11,5 +15,4 @@ include ':UIBestPractice'
 include ':ActivityLifeCycleTest'
 include ':RecyclerViewTest'
 include ':ListViewTest'
-include ':demo'
 rootProject.name = "AndroidStudy"

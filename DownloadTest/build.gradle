@@ -7,7 +7,7 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "com.example.listviewtest"
+        applicationId "com.example.downloadtest"
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
@@ -29,6 +29,10 @@ android {
 }
 
 dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation files('libs\\commons-lang3-3.11.jar')
+    implementation files('libs\\newland.jar')
+    implementation files('libs\\xUtils-2.6.14.jar')
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
