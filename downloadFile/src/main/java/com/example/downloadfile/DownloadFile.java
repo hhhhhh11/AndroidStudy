@@ -1,27 +1,22 @@
-package com.example.downloadtest;
+package com.example.downloadfile;
 
 import android.content.Context;
-import android.newland.os.NlBuild;
 
 import com.lidroid.xutils.util.LogUtils;
 import com.updatedemo.util.ApplicationUtil;
 import com.updatedemo.util.BytesUtils;
 import com.updatedemo.util.Dump;
 import com.updatedemo.util.FileUtil;
-
 import com.updatedemo.util.RomHelp;
 import com.updatedemo.util.SerialManager;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class DownFile {
+public class DownloadFile {
 
     private SerialManager mSerialManager;
     private RomHelp romHelp;
@@ -227,17 +222,16 @@ public class DownFile {
         int readLen=0;
         while(inUpdateFile==1){
 
-            if (shakeHandSucess==0){
+            if(shakeHandSucess==0){
                 LogUtils.e("shake hand");
                 byte[] start=new byte[]{0x06};
                 sdtp_send1(start);
+                readLen=7;
             }
             /*收到的数据,完整的一帧*/
             arrayPCSend=sdtp_recv(readLen,1);
-            LogUtils.d(" arrayPCSend.length == "+arrayPCSend.length);
-            if(arrayPCSend==null||arrayPCSend.length==0){
-                LogUtils.e(" --- recv null --- ");
-                continue;
+            if(arrayPCSend==null){
+                return -1;
             }
             /*  getData
                 // array: [ startTag ][ frameType ][ frameNo ][ Data ][ CRC ][ endTag ]
@@ -259,7 +253,7 @@ public class DownFile {
                     sdtp_send(posInfo);
                     readLen=84;
                 }
-                else if(c==0x02||c==0x07||c==0x05||c==0x10){
+                else if(c==0x02||c==0x07||c==0x05){
                     LogUtils.e("下载文件");
                     shakeHandSucess=1;
                     byte[] rlen_byteArray=byteArrayCut(arrayRecdata,1,4);
@@ -366,7 +360,6 @@ public class DownFile {
                         return 7;
                     }
                 }else if(c==0x01){//OTA包不匹配
-                    LogUtils.e("    OTA包不匹配     ");
                     inUpdateFile=0;
                     mSerialManager.serialClose();
                     return -3;
@@ -444,11 +437,6 @@ public class DownFile {
                     ret=mSerialManager.serialRead(arrayReceive,readLen,0);
                     LogUtils.e("  (sdtp_send)ret  "+ret);
                     if(ret==-1){
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
                         continue;
                     }
                     while (arrayReceive[ret-1]!=0x7e){
@@ -506,7 +494,6 @@ public class DownFile {
             int frameNo=mFrameNoFlag;
 
             for(int retry=0;retry<RETRY_TIMES;retry++){
-
                 LogUtils.d("----sdtp_send1   retry--------  "+retry);
                 LogUtils.e("--------SN--------  "+mFrameNoFlag);
                 //重试3次
@@ -596,13 +583,13 @@ public class DownFile {
                     i++;
 
                     if(ret==-1){
-                        LogUtils.d("------ while (recvFinish==0) ret== -1 ------ ");
+                        LogUtils.d("------ ret== -1 ------ ");
                         try {
                             Thread.sleep(10);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        break;
+                        continue;
                     }//end if
                     if (ret>=0&&ret<receive_256Byte){
                         LogUtils.d("----------- (stdp_recv)读完数据 -----------");
@@ -613,10 +600,7 @@ public class DownFile {
                     position+=ret;
 
                 }//end while
-                if (ret==-1){
-                    LogUtils.d("------ for循环(retry) ret== -1 ------ ");
-                    continue;
-                }
+
 //            LogUtils.e( "(sdtp_recv)Read From PC : " + byteArrayToHexString(arrayReceive));
 //            LogUtils.e( "(sdtp_recv)Read From PC -------------------------------" );
 
@@ -648,21 +632,13 @@ public class DownFile {
                 break;
             }//for循环，重试三次
             // 发送确认帧
-            if (ret==-1){
-                LogUtils.e("------- (do while循环) ret == -1 ------ ");
-                break;
-            }
-            if (ret!=-1){
-                LogUtils.d("-----发送ACK---------");
-                sendOneFrame(TYPE_ACK, mFrameNoFlag, new byte[]{});
-                // 帧序号递增
-                addFrameNo();
-            }
+            LogUtils.d("-----ACK---------");
+            sendOneFrame(TYPE_ACK, mFrameNoFlag, new byte[]{});
+            // 帧序号递增
+            addFrameNo();
             //如果数据帧中的数据长度为最大长度16384，则表示后续还有数据帧，回到循环开头继续等待接收返回数据帧
         }while (arrayReceiveReal.length>=DATAFRAME_MAXLEN);
-        if (ret > 0){
-            LogUtils.e( "从PC读到的帧 Frame Read From PC : " + byteArrayToHexString(arrayReceiveReal));
-        }
+        LogUtils.e( "从PC读到的帧 Frame Read From PC : " + byteArrayToHexString(arrayReceiveReal));
 
         return arrayReceiveReal;
     }
@@ -799,12 +775,10 @@ public class DownFile {
              break;
          }//for循环，重试三次
             // 发送确认帧
-            if (ret!=-1){
-                LogUtils.d("-----发送ACK---------");
-                sendOneFrame(TYPE_ACK, mFrameNoFlag, new byte[]{});
-                // 帧序号递增
-                addFrameNo();
-            }
+            LogUtils.d("-----发送ACK---------");
+            sendOneFrame(TYPE_ACK, mFrameNoFlag, new byte[]{});
+            // 帧序号递增
+            addFrameNo();
          //如果数据帧中的数据长度为最大长度16384，则表示后续还有数据帧，回到循环开头继续等待接收返回数据帧
         }while (arrayReceiveReal.length>=DATAFRAME_MAXLEN);
         LogUtils.e( "从PC读到的帧(前20 byte) Frame Read From PC : " + byteArrayToHexString(byteArrayCut(arrayReceiveRealFrame,0,20)));

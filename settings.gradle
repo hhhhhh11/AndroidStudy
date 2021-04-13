@@ -1,5 +1,6 @@
+include ':RuntimePermissionTest'
 include ':testjar'
-include ':downFile'
+include ':downloadFile'
 include ':DownloadTest'
 include ':DataBaseTest'
 include ':SharedPreferencesTest'

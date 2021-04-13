@@ -2,6 +2,7 @@ package com.example.downloadtest;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.newland.os.NlBuild;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -24,16 +25,23 @@ public class MainActivity extends AppCompatActivity {
         Button btn_download=findViewById(R.id.button);
         Button btnRead=findViewById(R.id.btn_read);
 
-        byte[] posInfo=new byte[]{0x00, (byte) 0x80,0x04,0x4e,0x39,0x30,0x30,
-                (byte) 0x81,0x03,0x53,0x41,0x32, (byte) 0x82,0x07,0x56,0x32,0x2e,0x31,0x2e,0x37,0x30, (byte) 0x83,0x0c,
-        0x4e,0x37,0x4e,0x4c,0x30,0x30,0x36,0x32,0x33,0x30,0x31,0x37, (byte) 0x84,0x0f,0x4e,0x37,
-        0x4e,0x4c,0x30,0x30,0x36,0x32,0x33,0x30,0x31,0x37,0x31,0x32,0x33,0x00};
+//        byte[] posInfo=new byte[]{0x00, (byte) 0x80,0x04,0x4e,0x39,0x30,0x30,
+//                (byte) 0x81,0x03,0x53,0x41,0x32, (byte) 0x82,0x07,0x56,0x32,0x2e,0x31,0x2e,0x37,0x30, (byte) 0x83,0x0c,
+//        0x4e,0x37,0x4e,0x4c,0x30,0x30,0x36,0x32,0x33,0x30,0x31,0x37, (byte) 0x84,0x0f,0x4e,0x37,
+//        0x4e,0x4c,0x30,0x30,0x36,0x32,0x33,0x30,0x31,0x37,0x31,0x32,0x33,0x00};
 
         String androidModel="N900";
         String androidHardwareVersion="SA2";
         String androidFirmwareVersion="V2.1.70";
         String sn="N7NL00623017";
         String pn="N7NL00623017123";
+
+//        String androidModel="N910";
+//        String androidHardwareVersion="SA2";
+//        String androidFirmwareVersion="V2.2.54";
+//        String sn="N7NL00622900";
+//        String pn="N711002NL002016";
+
         byte[] appInfo=new byte[]{0x01};
         byte[] readData=new byte[1024*16];
         mDownFile=new DownFile();
@@ -53,9 +61,18 @@ public class MainActivity extends AppCompatActivity {
                      * @param dir 下载路径(不为null，其他参数可为null)
                      * @return 0-成功  -3 ota包不匹配  -4/-1失败 -33串口打开失败 1-OTA测试结束
                      */
-                    mDownFile.downloadAppAndFirm(androidModel,
-                            androidHardwareVersion, androidFirmwareVersion,
-                            sn, pn,(PCDownDir.getAbsolutePath()+"/").getBytes(),MainActivity.this);
+//                    mDownFile.downloadAppAndFirm(androidModel,
+//                            androidHardwareVersion, androidFirmwareVersion,
+//                            sn, pn,(PCDownDir.getAbsolutePath()+"/").getBytes(),MainActivity.this);
+                    LogUtils.e("NlBuild.VERSION.MODEL "+NlBuild.VERSION.MODEL
+                            +"      NlBuild.VERSION.NL_HARDWARE_ID "+NlBuild.VERSION.NL_HARDWARE_ID
+                            +"      NlBuild.VERSION.NL_FIRMWARE "+NlBuild.VERSION.NL_FIRMWARE);
+                    mDownFile.downloadAppAndFirm(NlBuild.VERSION.MODEL,NlBuild.VERSION.NL_HARDWARE_ID, NlBuild.VERSION.NL_FIRMWARE,sn,pn,
+                            (PCDownDir.getAbsolutePath()+"/").getBytes(),MainActivity.this);
+//                    mDownFile.downloadAppAndFirm(androidModel,androidHardwareVersion, androidFirmwareVersion,sn,pn,
+//                            (PCDownDir.getAbsolutePath()+"/").getBytes(),MainActivity.this);
+
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

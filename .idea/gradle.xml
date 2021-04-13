@@ -22,9 +22,10 @@
             <option value="$PROJECT_DIR$/FragmentTest" />
             <option value="$PROJECT_DIR$/ListViewTest" />
             <option value="$PROJECT_DIR$/RecyclerViewTest" />
+            <option value="$PROJECT_DIR$/RuntimePermissionTest" />
             <option value="$PROJECT_DIR$/SharedPreferencesTest" />
             <option value="$PROJECT_DIR$/UIBestPractice" />
-            <option value="$PROJECT_DIR$/downFile" />
+            <option value="$PROJECT_DIR$/downloadFile" />
             <option value="$PROJECT_DIR$/testjar" />
           </set>
         </option>
