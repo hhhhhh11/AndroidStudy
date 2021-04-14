@@ -51,7 +51,7 @@ dependencies {
 
 
 task clearJar() {
-    delete 'build/libs/downloadFile-v-1.0.1-release.jar'
+    delete 'build/libs/downloadFile-v-1.0.3-release.jar'
 }
 
 task makeJar(type: Jar) {
@@ -62,7 +62,7 @@ task makeJar(type: Jar) {
     //如果你封装的jar包用起来有问题，很可能是此处出错
 //    from('build/intermediates/javac/debug/classes/')
     appendix = "v"
-    version = "1.0.1"
+    version = "1.0.3"
     classifier = "release"
     // 后缀名
     extension = "jar"

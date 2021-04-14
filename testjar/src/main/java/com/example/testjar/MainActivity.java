@@ -7,13 +7,13 @@ import android.view.View;
 import android.widget.Button;
 
 
-import com.example.downfile.DownFile;
+import com.example.downloadfile.DownLoadFile;
 
 import java.io.File;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
-    private DownFile mDownFile;
+    private DownLoadFile mDownLoadFile;
     /** 下载目录 */
     private static final File PCDownDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/newland_pcdownload");
 
@@ -26,13 +26,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mDownFile=new DownFile();
+        mDownLoadFile=new DownLoadFile();
         Button btn_download=(Button)findViewById(R.id.button_download);
         btn_download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
-                    mDownFile.downloadAppAndFirm(androidModel,
+                    mDownLoadFile.downloadAppAndFirm(androidModel,
                             androidHardwareVersion, androidFirmwareVersion,
                             sn, pn,(PCDownDir.getAbsolutePath()+"/").getBytes(),MainActivity.this);
                 } catch (IOException e) {

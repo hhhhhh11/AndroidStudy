@@ -16,7 +16,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class DownloadFile {
+public class DownLoadFile {
 
     private SerialManager mSerialManager;
     private RomHelp romHelp;
@@ -64,7 +64,7 @@ public class DownloadFile {
 
     public byte[] mNextByteArray;
 
-    public static int mFrameNoFlag = 0x00; // 帧序号
+    public int mFrameNoFlag = 0x00; // 帧序号
 
     static final int[] crc16_table = {
             0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
@@ -221,17 +221,18 @@ public class DownloadFile {
         int downType = 0;
         int readLen=0;
         while(inUpdateFile==1){
-
+            LogUtils.e(" 起始帧序号 "+mFrameNoFlag);
             if(shakeHandSucess==0){
                 LogUtils.e("shake hand");
                 byte[] start=new byte[]{0x06};
                 sdtp_send1(start);
-                readLen=7;
             }
             /*收到的数据,完整的一帧*/
             arrayPCSend=sdtp_recv(readLen,1);
-            if(arrayPCSend==null){
-                return -1;
+            LogUtils.d(" arrayPCSend.length == "+arrayPCSend.length);
+            if(arrayPCSend==null||arrayPCSend.length==0){
+                LogUtils.e(" --- recv null --- ");
+                continue;
             }
             /*  getData
                 // array: [ startTag ][ frameType ][ frameNo ][ Data ][ CRC ][ endTag ]
@@ -253,7 +254,7 @@ public class DownloadFile {
                     sdtp_send(posInfo);
                     readLen=84;
                 }
-                else if(c==0x02||c==0x07||c==0x05){
+                else if(c==0x02||c==0x07||c==0x05||c==0x10){
                     LogUtils.e("下载文件");
                     shakeHandSucess=1;
                     byte[] rlen_byteArray=byteArrayCut(arrayRecdata,1,4);
@@ -350,6 +351,8 @@ public class DownloadFile {
                 } else if(c==0x03){
                     LogUtils.e("get reboot cmd");
                     inUpdateFile=0;
+                    mFrameNoFlag=0;
+                    LogUtils.e(" mFrameNoFlag置零 "+mFrameNoFlag);
                     mSerialManager.serialClose();
                     LogUtils.e("downType"+downType);
                     if(downType == 0){
@@ -360,6 +363,7 @@ public class DownloadFile {
                         return 7;
                     }
                 }else if(c==0x01){//OTA包不匹配
+                    LogUtils.e("    OTA包不匹配     ");
                     inUpdateFile=0;
                     mSerialManager.serialClose();
                     return -3;
@@ -437,6 +441,11 @@ public class DownloadFile {
                     ret=mSerialManager.serialRead(arrayReceive,readLen,0);
                     LogUtils.e("  (sdtp_send)ret  "+ret);
                     if(ret==-1){
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                         continue;
                     }
                     while (arrayReceive[ret-1]!=0x7e){
@@ -494,6 +503,7 @@ public class DownloadFile {
             int frameNo=mFrameNoFlag;
 
             for(int retry=0;retry<RETRY_TIMES;retry++){
+
                 LogUtils.d("----sdtp_send1   retry--------  "+retry);
                 LogUtils.e("--------SN--------  "+mFrameNoFlag);
                 //重试3次
@@ -583,13 +593,13 @@ public class DownloadFile {
                     i++;
 
                     if(ret==-1){
-                        LogUtils.d("------ ret== -1 ------ ");
+                        LogUtils.d("------ while (recvFinish==0) ret== -1 ------ ");
                         try {
                             Thread.sleep(10);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        continue;
+                        break;
                     }//end if
                     if (ret>=0&&ret<receive_256Byte){
                         LogUtils.d("----------- (stdp_recv)读完数据 -----------");
@@ -600,7 +610,10 @@ public class DownloadFile {
                     position+=ret;
 
                 }//end while
-
+                if (ret==-1){
+                    LogUtils.d("------ for循环(retry) ret== -1 ------ ");
+                    continue;
+                }
 //            LogUtils.e( "(sdtp_recv)Read From PC : " + byteArrayToHexString(arrayReceive));
 //            LogUtils.e( "(sdtp_recv)Read From PC -------------------------------" );
 
@@ -632,13 +645,21 @@ public class DownloadFile {
                 break;
             }//for循环，重试三次
             // 发送确认帧
-            LogUtils.d("-----ACK---------");
-            sendOneFrame(TYPE_ACK, mFrameNoFlag, new byte[]{});
-            // 帧序号递增
-            addFrameNo();
+            if (ret==-1){
+                LogUtils.e("------- (do while循环) ret == -1 ------ ");
+                break;
+            }
+            if (ret!=-1){
+                LogUtils.d("-----发送ACK---------");
+                sendOneFrame(TYPE_ACK, mFrameNoFlag, new byte[]{});
+                // 帧序号递增
+                addFrameNo();
+            }
             //如果数据帧中的数据长度为最大长度16384，则表示后续还有数据帧，回到循环开头继续等待接收返回数据帧
         }while (arrayReceiveReal.length>=DATAFRAME_MAXLEN);
-        LogUtils.e( "从PC读到的帧 Frame Read From PC : " + byteArrayToHexString(arrayReceiveReal));
+        if (ret > 0){
+            LogUtils.e( "从PC读到的帧 Frame Read From PC : " + byteArrayToHexString(arrayReceiveReal));
+        }
 
         return arrayReceiveReal;
     }
@@ -775,10 +796,12 @@ public class DownloadFile {
              break;
          }//for循环，重试三次
             // 发送确认帧
-            LogUtils.d("-----发送ACK---------");
-            sendOneFrame(TYPE_ACK, mFrameNoFlag, new byte[]{});
-            // 帧序号递增
-            addFrameNo();
+            if (ret!=-1){
+                LogUtils.d("-----发送ACK---------");
+                sendOneFrame(TYPE_ACK, mFrameNoFlag, new byte[]{});
+                // 帧序号递增
+                addFrameNo();
+            }
          //如果数据帧中的数据长度为最大长度16384，则表示后续还有数据帧，回到循环开头继续等待接收返回数据帧
         }while (arrayReceiveReal.length>=DATAFRAME_MAXLEN);
         LogUtils.e( "从PC读到的帧(前20 byte) Frame Read From PC : " + byteArrayToHexString(byteArrayCut(arrayReceiveRealFrame,0,20)));

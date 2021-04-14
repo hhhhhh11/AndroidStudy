@@ -21,7 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class DownFile {
+public class DownLoadFile {
 
     private SerialManager mSerialManager;
     private RomHelp romHelp;
@@ -69,7 +69,7 @@ public class DownFile {
 
     public byte[] mNextByteArray;
 
-    public static int mFrameNoFlag = 0x00; // 帧序号
+    public int mFrameNoFlag = 0x00; // 帧序号
 
     static final int[] crc16_table = {
             0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
@@ -226,8 +226,8 @@ public class DownFile {
         int downType = 0;
         int readLen=0;
         while(inUpdateFile==1){
-
-            if (shakeHandSucess==0){
+            LogUtils.e(" 起始帧序号 "+mFrameNoFlag);
+            if(shakeHandSucess==0){
                 LogUtils.e("shake hand");
                 byte[] start=new byte[]{0x06};
                 sdtp_send1(start);
@@ -356,6 +356,8 @@ public class DownFile {
                 } else if(c==0x03){
                     LogUtils.e("get reboot cmd");
                     inUpdateFile=0;
+                    mFrameNoFlag=0;
+                    LogUtils.e(" mFrameNoFlag置零 "+mFrameNoFlag);
                     mSerialManager.serialClose();
                     LogUtils.e("downType"+downType);
                     if(downType == 0){

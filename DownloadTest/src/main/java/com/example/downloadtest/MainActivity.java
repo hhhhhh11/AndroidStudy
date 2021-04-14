@@ -15,7 +15,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
-    private DownFile mDownFile;
+    private DownLoadFile mDownLoadFile;
     /** 下载目录 */
     private static final File PCDownDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/newland_pcdownload");
     @Override
@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
         byte[] appInfo=new byte[]{0x01};
         byte[] readData=new byte[1024*16];
-        mDownFile=new DownFile();
+        mDownLoadFile=new DownLoadFile();
         SerialManager serialManager=new SerialManager(MainActivity.this);
         serialManager.clearSerial();
         btn_download.setOnClickListener(new View.OnClickListener() {
@@ -61,15 +61,15 @@ public class MainActivity extends AppCompatActivity {
                      * @param dir 下载路径(不为null，其他参数可为null)
                      * @return 0-成功  -3 ota包不匹配  -4/-1失败 -33串口打开失败 1-OTA测试结束
                      */
-//                    mDownFile.downloadAppAndFirm(androidModel,
+//                    mDownLoadFile.downloadAppAndFirm(androidModel,
 //                            androidHardwareVersion, androidFirmwareVersion,
 //                            sn, pn,(PCDownDir.getAbsolutePath()+"/").getBytes(),MainActivity.this);
                     LogUtils.e("NlBuild.VERSION.MODEL "+NlBuild.VERSION.MODEL
                             +"      NlBuild.VERSION.NL_HARDWARE_ID "+NlBuild.VERSION.NL_HARDWARE_ID
                             +"      NlBuild.VERSION.NL_FIRMWARE "+NlBuild.VERSION.NL_FIRMWARE);
-                    mDownFile.downloadAppAndFirm(NlBuild.VERSION.MODEL,NlBuild.VERSION.NL_HARDWARE_ID, NlBuild.VERSION.NL_FIRMWARE,sn,pn,
+                    mDownLoadFile.downloadAppAndFirm(NlBuild.VERSION.MODEL,NlBuild.VERSION.NL_HARDWARE_ID, NlBuild.VERSION.NL_FIRMWARE,sn,pn,
                             (PCDownDir.getAbsolutePath()+"/").getBytes(),MainActivity.this);
-//                    mDownFile.downloadAppAndFirm(androidModel,androidHardwareVersion, androidFirmwareVersion,sn,pn,
+//                    mDownLoadFile.downloadAppAndFirm(androidModel,androidHardwareVersion, androidFirmwareVersion,sn,pn,
 //                            (PCDownDir.getAbsolutePath()+"/").getBytes(),MainActivity.this);
 
 
