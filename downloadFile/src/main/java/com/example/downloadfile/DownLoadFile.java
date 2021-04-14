@@ -182,6 +182,12 @@ public class DownLoadFile {
 
         int ret = -1;
         String appInfo = getAppInfo(context);
+        //关闭日志
+        LogUtils.allowD=false;
+        LogUtils.allowE=false;
+
+//        Log.e("logd","LogUtils.allowD "+LogUtils.allowD);
+//        Log.e("loge","LogUtils.allowE "+LogUtils.allowE);
 
         LogUtils.e("上传信息：" + appInfo);
         if (!appInfo.isEmpty()) {
