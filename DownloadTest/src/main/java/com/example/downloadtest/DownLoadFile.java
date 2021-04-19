@@ -189,8 +189,8 @@ public class DownLoadFile {
         int ret = -1;
         String appInfo = getAppInfo(context);
         //关闭日志
-        LogUtils.allowD=false;
-        LogUtils.allowE=false;
+//        LogUtils.allowD=false;
+//        LogUtils.allowE=false;
 
 //        Log.e("logd","LogUtils.allowD "+LogUtils.allowD);
 //        Log.e("loge","LogUtils.allowE "+LogUtils.allowE);
@@ -227,6 +227,7 @@ public class DownLoadFile {
         int ret=0;
         byte[] arrayRecdata={};
         byte[] arrayPCSend={};
+        byte[] wholeFrame_fromEscape_0;
         mSerialManager = new SerialManager(context);
         mSerialManager.initAnalogSerial();
         int rlen;
@@ -246,11 +247,22 @@ public class DownLoadFile {
                 LogUtils.e(" --- recv null --- ");
                 continue;
             }
+            //array: [ startTag ][ frameType ][ frameNo ][ Data ][ CRC ][ endTag ]
+            //receiveFrame_withoutSYN: [ frameType ][ frameNo ][ Data ][ CRC ]
+            byte[] receiveFrame_withoutSYN_0=getFrame_withoutSYN(arrayPCSend,arrayPCSend.length);
+            //对receiveFrame_withoutSYN进行转义
+            byte[] receiveFrame_withoutSYN_fromEscape_0=fromEscape(receiveFrame_withoutSYN_0);
+            //把receiveFrame_withoutSYN还原成完整的一帧（加上开头结尾的0x7e）
+            wholeFrame_fromEscape_0=byteArrayMerge(new byte[]{SYN},receiveFrame_withoutSYN_fromEscape_0);
+            wholeFrame_fromEscape_0=byteArrayMerge(wholeFrame_fromEscape_0,new byte[]{SYN});
+
+            LogUtils.d(" 转义后的长度 "+wholeFrame_fromEscape_0.length);
+
             /*  getData
                 // array: [ startTag ][ frameType ][ frameNo ][ Data ][ CRC ][ endTag ]
                // data: [ Data ]
             */
-            arrayRecdata=getData(arrayPCSend,arrayPCSend.length);
+            arrayRecdata=getData(wholeFrame_fromEscape_0,wholeFrame_fromEscape_0.length);
             ret=arrayRecdata.length;
             LogUtils.d("--------- recv data "+byteArrayToHexString(arrayRecdata));
 
@@ -282,6 +294,8 @@ public class DownLoadFile {
                         downType = 5;
                     }else if(c == 0x07){
                         downType = 7;
+                    }else if(c == 0x10){
+                        downType = 10;
                     }
                     // 获取下载的文件的 文件名
 
@@ -297,12 +311,7 @@ public class DownLoadFile {
                     //创建文件
                     File file=new File(byteToString(ppath));
                     file.createNewFile();
-//                    OutputStream out=null;
-//                    try {
-//                        out=new FileOutputStream(file);/*实例化OutputStream*/
-//                    }catch (FileNotFoundException e){
-//                        e.printStackTrace();
-//                    }
+
                     
                     byte[] startTransmission=new byte[]{0x00};
                     sdtp_send(startTransmission);//发送0x00开始传输
@@ -373,10 +382,14 @@ public class DownLoadFile {
                         return 5;
                     }else if(downType == 7){
                         return 7;
+                    }else if(downType == 10){
+                        return 10;
                     }
                 }else if(c==0x01){//OTA包不匹配
                     LogUtils.e("    OTA包不匹配     ");
                     inUpdateFile=0;
+                    mFrameNoFlag=0;
+                    LogUtils.e(" mFrameNoFlag置零 "+mFrameNoFlag);
                     mSerialManager.serialClose();
                     return -3;
                 }else if(c==0x04){//清除应用
@@ -405,10 +418,14 @@ public class DownLoadFile {
             }
         }
         if(shakeHandSucess==0){
+            mFrameNoFlag=0;
+            LogUtils.e(" mFrameNoFlag置零 "+mFrameNoFlag);
             mSerialManager.serialClose();
             return -4;
         }
         LogUtils.e("end......");
+            mFrameNoFlag=0;
+            LogUtils.e(" mFrameNoFlag置零 "+mFrameNoFlag);
         mSerialManager.serialClose();
         return 0;
     }
@@ -603,7 +620,10 @@ public class DownLoadFile {
                     LogUtils.e("第"+i+"次ret : "+ret);
                     LogUtils.e("第"+i+"次arrayReceive(前10个byte): "+byteArrayToHexString(byteArrayCut(arrayReceive_256Byte,0,10)));
                     i++;
-
+                    if (arrayReceive_256Byte[1]!=0x02){
+                        LogUtils.d(" ------ type != 0x02----");
+                        continue;
+                    }
                     if(ret==-1){
                         LogUtils.d("------ while (recvFinish==0) ret== -1 ------ ");
                         try {
@@ -633,6 +653,8 @@ public class DownLoadFile {
                 //获取完整的一帧
                 arrayReceiveLen = recv_a_fame(arrayReceive);
                 LogUtils.e( "收到数组的长度（0x7e到0x7e）arrayReceiveLen: " + arrayReceiveLen);
+                arrayTemp=fromEscape(byteArrayCut(arrayReceive,0,arrayReceiveLen));
+                LogUtils.e("转义之后的长度 "+arrayTemp.length);
                 //去除多余的0x00
                 arrayReceiveReal=byteArrayCut(arrayReceive,0,arrayReceiveLen);
                 LogUtils.d( "读到的数据（前10个byte）: " + byteArrayToHexString(byteArrayCut(arrayReceiveReal,0,10)));

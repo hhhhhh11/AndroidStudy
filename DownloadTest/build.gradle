@@ -1,11 +1,28 @@
 plugins {
     id 'com.android.application'
 }
+def releaseTime() {
+    return new Date().format("yyyyMMdd", TimeZone.getDefault());
+}
 
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
+    signingConfigs {
+        release {
+            storeFile file("../newland_keystore.jks")
+            storePassword 'newland'
+            keyAlias 'key0'
+            keyPassword 'newland'
+        }
 
+//        debug {
+//            storeFile file("../newland_keystore.jks")
+//            storePassword 'newland'
+//            keyAlias 'key0'
+//            keyPassword 'newland'
+//        }
+    }
     defaultConfig {
         applicationId "com.example.downloadtest"
         minSdkVersion 21
@@ -15,7 +32,11 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "DownloadFileTest-V${variant.versionName}-${releaseTime()}-${variant.buildType.name}.apk"
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false

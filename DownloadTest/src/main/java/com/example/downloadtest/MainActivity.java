@@ -33,8 +33,25 @@ public class MainActivity extends AppCompatActivity {
         String androidModel="N900";
         String androidHardwareVersion="SA2";
         String androidFirmwareVersion="V2.1.70";
-        String sn="N7NL00623017";
-        String pn="N7NL00623017123";
+        String sn=" ";
+        String pn=" ";
+        sn="X1NL00000001";
+        pn="X111001NL000000";
+//        if (NlBuild.VERSION.MODEL == "CPOS X5"){
+//            LogUtils.d(" Model:"+NlBuild.VERSION.MODEL);
+//            sn="X1NL00000001";
+//            pn="X111001NL000000";
+//        }
+//        if (NlBuild.VERSION.MODEL == "N900"){
+//           LogUtils.d(" Model:"+NlBuild.VERSION.MODEL);
+//           sn="N7NL00623017";
+//           pn="N7NL00623017123";
+//        }
+//        if (NlBuild.VERSION.MODEL == "N910"){
+//            LogUtils.d(" Model:"+NlBuild.VERSION.MODEL);
+//            sn="N7NL00622900";
+//            pn="N711002NL002016";
+//        }
 
 //        String androidModel="N910";
 //        String androidHardwareVersion="SA2";
@@ -47,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
         mDownLoadFile=new DownLoadFile();
         SerialManager serialManager=new SerialManager(MainActivity.this);
         serialManager.clearSerial();
+        String finalSn = sn;
+        String finalPn = pn;
         btn_download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -67,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
                     LogUtils.e("NlBuild.VERSION.MODEL "+NlBuild.VERSION.MODEL
                             +"      NlBuild.VERSION.NL_HARDWARE_ID "+NlBuild.VERSION.NL_HARDWARE_ID
                             +"      NlBuild.VERSION.NL_FIRMWARE "+NlBuild.VERSION.NL_FIRMWARE);
-                    mDownLoadFile.downloadAppAndFirm(NlBuild.VERSION.MODEL,NlBuild.VERSION.NL_HARDWARE_ID, NlBuild.VERSION.NL_FIRMWARE,sn,pn,
+                    mDownLoadFile.downloadAppAndFirm(NlBuild.VERSION.MODEL,NlBuild.VERSION.NL_HARDWARE_ID, NlBuild.VERSION.NL_FIRMWARE, finalSn, finalPn,
                             (PCDownDir.getAbsolutePath()+"/").getBytes(),MainActivity.this);
 //                    mDownLoadFile.downloadAppAndFirm(androidModel,androidHardwareVersion, androidFirmwareVersion,sn,pn,
 //                            (PCDownDir.getAbsolutePath()+"/").getBytes(),MainActivity.this);
