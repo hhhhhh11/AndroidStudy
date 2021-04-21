@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.lidroid.xutils.util.LogUtils;
+import com.updatedemo.util.NdkApi;
 import com.updatedemo.util.SerialManager;
 
 import java.io.File;
@@ -16,8 +17,10 @@ import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
     private DownLoadFile mDownLoadFile;
+    private NdkApi ndkApi;
     /** 下载目录 */
     private static final File PCDownDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/newland_pcdownload");
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
         Button btn_download=findViewById(R.id.button);
         Button btnRead=findViewById(R.id.btn_read);
 
+        ndkApi = new NdkApi();
 //        byte[] posInfo=new byte[]{0x00, (byte) 0x80,0x04,0x4e,0x39,0x30,0x30,
 //                (byte) 0x81,0x03,0x53,0x41,0x32, (byte) 0x82,0x07,0x56,0x32,0x2e,0x31,0x2e,0x37,0x30, (byte) 0x83,0x0c,
 //        0x4e,0x37,0x4e,0x4c,0x30,0x30,0x36,0x32,0x33,0x30,0x31,0x37, (byte) 0x84,0x0f,0x4e,0x37,
@@ -35,8 +39,12 @@ public class MainActivity extends AppCompatActivity {
         String androidFirmwareVersion="V2.1.70";
         String sn=" ";
         String pn=" ";
-        sn="X1NL00000001";
-        pn="X111001NL000000";
+//        sn="X1NL00000001";
+//        pn="X111001NL000000";
+        sn = ndkApi.getSn();
+        pn = ndkApi.getPn();
+//            sn="N2NL00000014";
+//            pn="N200000NL000001";
 //        if (NlBuild.VERSION.MODEL == "CPOS X5"){
 //            LogUtils.d(" Model:"+NlBuild.VERSION.MODEL);
 //            sn="X1NL00000001";
@@ -52,6 +60,11 @@ public class MainActivity extends AppCompatActivity {
 //            sn="N7NL00622900";
 //            pn="N711002NL002016";
 //        }
+//        if (NlBuild.VERSION.MODEL == "N920"){
+//            LogUtils.d(" Model:"+NlBuild.VERSION.MODEL);
+//            sn="N2NL00000014";
+//            pn="N200000NL000001";
+//        }
 
 //        String androidModel="N910";
 //        String androidHardwareVersion="SA2";
@@ -64,8 +77,13 @@ public class MainActivity extends AppCompatActivity {
         mDownLoadFile=new DownLoadFile();
         SerialManager serialManager=new SerialManager(MainActivity.this);
         serialManager.clearSerial();
+
         String finalSn = sn;
         String finalPn = pn;
+        LogUtils.e("NlBuild.VERSION.MODEL:"+NlBuild.VERSION.MODEL
+                +"      NlBuild.VERSION.NL_HARDWARE_ID:"+NlBuild.VERSION.NL_HARDWARE_ID
+                +"      NlBuild.VERSION.NL_FIRMWARE:"+NlBuild.VERSION.NL_FIRMWARE
+                +"      SN:"+ finalSn +"|PN:"+ finalPn);
         btn_download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -83,9 +101,7 @@ public class MainActivity extends AppCompatActivity {
 //                    mDownLoadFile.downloadAppAndFirm(androidModel,
 //                            androidHardwareVersion, androidFirmwareVersion,
 //                            sn, pn,(PCDownDir.getAbsolutePath()+"/").getBytes(),MainActivity.this);
-                    LogUtils.e("NlBuild.VERSION.MODEL "+NlBuild.VERSION.MODEL
-                            +"      NlBuild.VERSION.NL_HARDWARE_ID "+NlBuild.VERSION.NL_HARDWARE_ID
-                            +"      NlBuild.VERSION.NL_FIRMWARE "+NlBuild.VERSION.NL_FIRMWARE);
+
                     mDownLoadFile.downloadAppAndFirm(NlBuild.VERSION.MODEL,NlBuild.VERSION.NL_HARDWARE_ID, NlBuild.VERSION.NL_FIRMWARE, finalSn, finalPn,
                             (PCDownDir.getAbsolutePath()+"/").getBytes(),MainActivity.this);
 //                    mDownLoadFile.downloadAppAndFirm(androidModel,androidHardwareVersion, androidFirmwareVersion,sn,pn,

@@ -56,7 +56,13 @@ public class DownLoadFile {
     //  1ms     65536
     public final int timeout_500ms=32768000;
     public final int timeout_400ms=26214400;
+    public final int timeout_300ms=19660800;
+    public final int timeout_200ms=13107200;
     public final int timeout_100ms=6553600;
+    public final int timeout_50ms=3276800;
+    public final int timeout_40ms=2621440;
+    public final int timeout_30ms=1966080;
+    public final int timeout_20ms=1310720;
     public final int timeout_10ms=655360;
     public final int timeout_1ms=65536;
 
@@ -382,6 +388,8 @@ public class DownLoadFile {
                 }else if(c==0x01){//OTA包不匹配
                     LogUtils.e("    OTA包不匹配     ");
                     inUpdateFile=0;
+                    mFrameNoFlag=0;
+                    LogUtils.e(" mFrameNoFlag置零 "+mFrameNoFlag);
                     mSerialManager.serialClose();
                     return -3;
                 }else if(c==0x04){//清除应用
@@ -410,10 +418,14 @@ public class DownLoadFile {
             }
         }
         if(shakeHandSucess==0){
+            mFrameNoFlag=0;
+            LogUtils.e(" mFrameNoFlag置零 "+mFrameNoFlag);
             mSerialManager.serialClose();
             return -4;
         }
         LogUtils.e("end......");
+            mFrameNoFlag=0;
+            LogUtils.e(" mFrameNoFlag置零 "+mFrameNoFlag);
         mSerialManager.serialClose();
         return 0;
     }
@@ -688,18 +700,183 @@ public class DownLoadFile {
 
     /**
      * 收16k一帧数据
-     * @param length(没用到)
+     * @param length
      * @param timeout(没用到)
      * @return
      */
     public byte[] sdtp_recv1(int length,int timeout){
         int receive_1k=1024;
         int receive_4k=4*1024;
+        int receive_16k=16*1024;
+        int receive_32k=32*1024;
         int arraySize=DATA_MAXLEN*2;
 
         byte[] arrayReceive_1Byte=new byte[1];
         byte[] arrayReceive_12Byte=new byte[12];
         byte[] arrayReceive_4k=new byte[receive_4k];
+        byte[] arrayReceive_16k=new byte[receive_16k];
+        byte[] arrayReceive_32k=new byte[receive_32k];
+        byte[] arrayReceive=new byte[arraySize];
+        byte[] arrayReceiveReal=new byte[]{};
+        byte[] arrayReceiveRealFrame=new byte[]{};
+        int arrayReceiveLen=0;
+        int ret=0;
+        int lastOneFrame=0;
+
+        byte[] arrayTemp = new byte[] {};
+        LogUtils.d("------ sdtp_recv1 ------");
+        do{
+         for (int retry = 0; retry < RETRY_TIMES; retry++) {
+             LogUtils.d("-----retry--- "+retry+" -------");
+
+             int i=0;
+             int recvFinish=0;
+             int position=0;
+             if(arrayReceiveLen>=DATA_MAXLEN){//读完16k，读null
+                 LogUtils.d("-----读null数据帧-------");
+//                 ret=mSerialManager.serialRead(arrayReceive_12Byte,12,timeout_1ms);  实际耗时30ms
+
+                 ret=mSerialManager.serialRead(arrayReceive_12Byte,6,0);
+                 LogUtils.e("  读null数据帧(sdtp_recv1)ret  "+ret);
+                 LogUtils.d("读null数据帧arrayReceive_12Byte "+byteArrayToHexString(arrayReceive_12Byte));
+                 if(ret==-1){
+                     continue;
+                 }
+                 while (arrayReceive_12Byte[ret-1]!=0x7e){
+                     mSerialManager.serialRead(arrayReceive_1Byte,1,0);
+                     arrayReceive_12Byte=byteArrayMerge(byteArrayCut(arrayReceive_12Byte,0,ret),arrayReceive_1Byte);
+                     ret++;
+                     LogUtils.e("  读null数据帧(sdtp_send)ret(while)  "+ret);
+                     LogUtils.d("读null数据帧arrayReceive_12Byte "+byteArrayToHexString(arrayReceive_12Byte));
+                 }
+
+             }else if(length<=receive_4k){//最后一帧
+                    LogUtils.d("-----读4k数据帧-------");
+                    lastOneFrame=1;
+                    ret=mSerialManager.serialRead(arrayReceive_4k,receive_4k,timeout_10ms);
+                    }
+                    else {
+                        LogUtils.d("-----读16k数据帧-------");
+                        ret=mSerialManager.serialRead(arrayReceive_4k,receive_4k,timeout_500ms);
+//                        LogUtils.e(" ret== "+ret);
+//                        ret=mSerialManager.serialRead(arrayReceive_32k,receive_32k,timeout_200ms);
+//                        LogUtils.e(" ret== "+ret);
+//                        ret=mSerialManager.serialRead(arrayReceive_32k,receive_16k+receive_16k,timeout_100ms);
+//                        LogUtils.e("print 16k数据(前15个byte):------16k数据帧 "+byteArrayToHexString(byteArrayCut(arrayReceive_32k,0,15)));
+//                        LogUtils.e("print 16k数据(后15个byte):------16k数据帧 "+byteArrayToHexString(byteArrayCut(arrayReceive_32k,16553,15)));
+                    }
+
+             LogUtils.e("第"+i+"次ret : "+ret);
+             if(ret==-1){
+                 LogUtils.d("------ ret== -1 ------ ");
+                 continue;
+             }//end if
+             //ret小于4k，表示读完了
+             if(ret<receive_4k){
+                 recvFinish=1;
+             }
+             if(arrayReceiveLen>=DATA_MAXLEN){
+                 LogUtils.e("第"+i+"次arrayReceive(前10个byte):------null数据帧 "+byteArrayToHexString(byteArrayCut(arrayReceive_12Byte,0,10)));
+                 System.arraycopy(arrayReceive_12Byte,0,arrayReceive,position,ret);
+             }else{
+                 LogUtils.e("第"+i+"次arrayReceive(前10个byte):------16k数据帧 "+byteArrayToHexString(byteArrayCut(arrayReceive_4k,0,10)));
+                 System.arraycopy(arrayReceive_4k,0,arrayReceive,position,ret);
+             }
+
+             position+=ret;
+             i++;
+             while (recvFinish==0){
+                 LogUtils.d("----------- (stdp_recv1)开始读数据 -----------");
+                 if (i==(length/receive_4k)){
+                     ret=mSerialManager.serialRead(arrayReceive_4k,receive_4k,0);
+                 }
+                 else {
+                     ret=mSerialManager.serialRead(arrayReceive_4k,receive_4k,timeout_50ms+timeout_10ms);
+                 }
+                LogUtils.e("第"+i+"次ret : "+ret);
+                LogUtils.e("第"+i+"次arrayReceive(前10个byte): "+byteArrayToHexString(byteArrayCut(arrayReceive_4k,0,10)));
+                i++;
+                if(ret==-1){
+                    LogUtils.d("------ ret== -1 ------ ");
+                    continue;
+                }//end if
+                 if (ret>=0&&ret<receive_4k){
+                     LogUtils.d("----------- (stdp_recv1)读完数据 -----------");
+                     recvFinish=1;
+                 }//end if
+                 LogUtils.e("------ position ------ "+position);
+                 System.arraycopy(arrayReceive_4k,0,arrayReceive,position,ret);
+                 position+=ret;
+             }//end while
+
+
+                // 数据发送完毕，等待接收返回数据帧
+                //获取完整的一帧
+             arrayReceiveLen=position;
+//                arrayReceiveLen = recv_a_fame(arrayReceive);
+                LogUtils.e( "收到数组的长度（0x7e到0x7e）arrayReceiveLen: " + arrayReceiveLen);
+                arrayTemp=fromEscape(byteArrayCut(arrayReceive,0,arrayReceiveLen));
+                LogUtils.e("转义之后的长度 "+arrayTemp.length);
+                //去除多余的0x00
+//                if(arrayReceiveLen>1024*16){
+//                    arrayReceiveRealFrame=byteArrayCut(arrayReceive,0,arrayReceiveLen);
+//                }
+             if(arrayReceiveLen>1024*16||arrayTemp.length>=7){
+                 arrayReceiveRealFrame=byteArrayCut(arrayReceive,0,arrayReceiveLen);
+             }
+             arrayReceiveReal=byteArrayCut(arrayReceive,0,arrayReceiveLen);
+            LogUtils.d( "读到的数据（前10个byte）: " + byteArrayToHexString(byteArrayCut(arrayReceiveReal,0,10)));
+//                LogUtils.d( "Receive data: " + byteArrayToHexString(arrayReceive));
+
+                // 检查数据帧格式，CRC校验
+                LogUtils.e("对收到的一帧进行 格式检查以及CRC校验 ");
+             LogUtils.d("arrayReceiveReal.length "+arrayReceiveReal.length);
+             //校验不通过
+             if (!checkData(TYPE_DATAFRAME, mFrameNoFlag, arrayReceiveReal, arrayReceiveReal.length)) {
+                 // 超过重试次数，结束流程
+                 if ((retry == RETRY_TIMES - 1)) {
+                     LogUtils.d("超过重试次数，结束流程");
+                     return null;
+                 }
+                 // 未超过重试次数，发送否认帧，重新等待
+                 sendOneFrame(TYPE_NACK, mFrameNoFlag, new byte[]{});
+                 LogUtils.d( "retry read confirm");
+//                 mSerialManager.clearSerial();
+                 continue;
+                }
+             // 校验通过，跳出重试循环
+             break;
+         }//for循环，重试三次
+            // 发送确认帧
+            if (ret!=-1){
+                LogUtils.d("-----发送ACK---------");
+                sendOneFrame(TYPE_ACK, mFrameNoFlag, new byte[]{});
+                // 帧序号递增
+                addFrameNo();
+            }
+         //如果数据帧中的数据长度为最大长度16384，则表示后续还有数据帧，回到循环开头继续等待接收返回数据帧
+        }while (arrayReceiveReal.length>=DATAFRAME_MAXLEN);
+        LogUtils.e( "从PC读到的帧(前20 byte) Frame Read From PC : " + byteArrayToHexString(byteArrayCut(arrayReceiveRealFrame,0,20)));
+
+        return arrayReceiveRealFrame;
+    } /**
+     * 收16k一帧数据
+     * @param length(没用到)
+     * @param timeout(没用到)
+     * @return
+     */
+    public byte[] sdtp_recv32(int length,int timeout){
+        int receive_1k=1024;
+        int receive_4k=4*1024;
+        int receive_16k=16*1024;
+        int receive_32k=32*1024;
+        int arraySize=DATA_MAXLEN*2;
+
+        byte[] arrayReceive_1Byte=new byte[1];
+        byte[] arrayReceive_12Byte=new byte[12];
+        byte[] arrayReceive_4k=new byte[receive_4k];
+        byte[] arrayReceive_16k=new byte[receive_16k];
+        byte[] arrayReceive_32k=new byte[receive_32k];
         byte[] arrayReceive=new byte[arraySize];
         byte[] arrayReceiveReal=new byte[]{};
         byte[] arrayReceiveRealFrame=new byte[]{};
@@ -707,7 +884,7 @@ public class DownLoadFile {
         int ret=0;
 
         byte[] arrayTemp = new byte[] {};
-        LogUtils.d("------ sdtp_recv1 ------");
+        LogUtils.d("------ sdtp_recv32 ------");
         do{
          for (int retry = 0; retry < RETRY_TIMES; retry++) {
              LogUtils.d("-----retry--- "+retry+" -------");
@@ -739,7 +916,10 @@ public class DownLoadFile {
                     }
                     else {
                         LogUtils.d("-----读16k数据帧-------");
-                        ret=mSerialManager.serialRead(arrayReceive_4k,receive_4k,timeout_500ms);
+//                        ret=mSerialManager.serialRead(arrayReceive_4k,receive_4k,timeout_500ms);
+                        ret=mSerialManager.serialRead(arrayReceive_32k,receive_16k+receive_16k,timeout_300ms);
+                        LogUtils.e("print 16k数据(前15个byte):------16k数据帧 "+byteArrayToHexString(byteArrayCut(arrayReceive_32k,0,15)));
+                        LogUtils.e("print 16k数据(后15个byte):------16k数据帧 "+byteArrayToHexString(byteArrayCut(arrayReceive_32k,16553,15)));
                     }
 
              LogUtils.e("第"+i+"次ret : "+ret);

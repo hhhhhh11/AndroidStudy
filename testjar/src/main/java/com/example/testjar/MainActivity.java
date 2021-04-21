@@ -1,6 +1,8 @@
 package com.example.testjar;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.newland.os.NlBuild;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -32,8 +34,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
-                    mDownLoadFile.downloadAppAndFirm(androidModel,
-                            androidHardwareVersion, androidFirmwareVersion,
+                    mDownLoadFile.downloadAppAndFirm(NlBuild.VERSION.MODEL,NlBuild.VERSION.NL_HARDWARE_ID, NlBuild.VERSION.NL_FIRMWARE,
                             sn, pn,(PCDownDir.getAbsolutePath()+"/").getBytes(),MainActivity.this);
                 } catch (IOException e) {
                     e.printStackTrace();
