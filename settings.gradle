@@ -1,3 +1,4 @@
+include ':NotificationTest'
 include ':RuntimePermissionTest'
 include ':testjar'
 include ':downloadFile'

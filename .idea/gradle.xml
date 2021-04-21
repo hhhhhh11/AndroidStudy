@@ -21,6 +21,7 @@
             <option value="$PROJECT_DIR$/FragmentBestPractice" />
             <option value="$PROJECT_DIR$/FragmentTest" />
             <option value="$PROJECT_DIR$/ListViewTest" />
+            <option value="$PROJECT_DIR$/NotificationTest" />
             <option value="$PROJECT_DIR$/RecyclerViewTest" />
             <option value="$PROJECT_DIR$/RuntimePermissionTest" />
             <option value="$PROJECT_DIR$/SharedPreferencesTest" />

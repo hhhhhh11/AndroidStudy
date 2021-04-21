@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">NotificationTest</string>
+
+    <string name="send_notice">send notice</string>
+    <string name="content_title">This is content title</string>
+    <string name="content_text">This is content text</string>
+    <string name="content_text_long">Learn how to build notifications,send and sync data,and use  voice actions.Get the officiaL Android IDE and developer tooLs to build apps for Android. </string>
+</resources>
