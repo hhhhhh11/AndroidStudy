@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="sp_content">
+        <item>ALL</item>
+        <item>LOGIN</item>
+        <item>IMPORT</item>
+        <item>DELETE</item>
+        <item>DOWNLOAD</item>
+    </string-array>
+</resources>

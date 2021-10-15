@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    tools:context=".MainActivity"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+
+    <Button
+        android:id="@+id/bt_download"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/main_xml_downloader"
+        android:background="@drawable/selector_btn_blue"
+        android:textColor="@color/white" />
+
+    <Button
+        android:id="@+id/bt_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/cancel"
+        android:background="@drawable/selector_btn_blue"
+        android:textColor="@color/white"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/bt_file"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/main_xml_choose"
+        android:background="@drawable/selector_btn_blue"
+        android:textColor="@color/white"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/bt_app"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/main_xml_get_app"
+        android:background="@drawable/selector_btn_blue"
+        android:textColor="@color/white"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/bt_set"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/main_xml_set"
+        android:background="@drawable/selector_btn_blue"
+        android:textColor="@color/white"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"/>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/cb_clear"
+        android:layout_marginTop="10dp"
+        android:text="@string/main_view_clear"
+        />
+
+    <TextView
+        android:id="@+id/tv_file"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorPrimary"
+        android:layout_marginTop="6dp"
+        android:text="@string/main_xml_file_list"/>
+
+   <View
+       android:id="@+id/view_split_line"
+       android:layout_width="match_parent"
+       android:layout_height="1dp"
+       android:background="@color/colorAccent"
+       android:layout_marginTop="26dp"/>
+
+    <ScrollView
+        android:id="@+id/sv_download_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorPrimary"
+                android:text="@string/main_xml_down_state"
+                android:layout_marginTop="6dp"/>
+
+
+            <TextView
+                android:id="@+id/tv_result"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/main_xml_down_file"
+                android:textSize="16sp"
+                android:layout_marginTop="6dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tv_result1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/main_xml_donw_pro"
+                    android:textSize="12dp"/>
+
+                <com.newland.download.ui.NumberProgressBar
+                    android:id="@+id/number_pb"
+                    android:layout_width="wrap_content"
+                    custom:progress_current="0"
+                    style="@style/NumberProgressBar_Default"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+
+    </ScrollView>
+
+</LinearLayout>
